@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -46,12 +45,11 @@ func Start() {
 	appHandler := handler.New(logger, conf, appService)
 	router := appHandler.Start()
 
-	// go func() {
-	// 	if err := router.Run(fmt.Sprintf("%s:%s", conf.HTTP.Host, conf.HTTP.Port)); err != nil {
-	// 		logger.Fatalf("error occured while running http server: %s", err.Error())
-	// 	}
-	// }()
-	go http.ListenAndServe(fmt.Sprintf(":%s", conf.HTTP.Port), router)
+	go func() {
+		if err := router.Run(fmt.Sprintf("%s:%s", conf.HTTP.Host, conf.HTTP.Port)); err != nil {
+			logger.Fatalf("error occured while running http server: %s", err.Error())
+		}
+	}()
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
